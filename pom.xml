@@ -42,8 +42,6 @@
 
 	<modules>
 		<module>releng/org.eclipse.cdt</module>
-		<module>releng/org.eclipse.cdt.platform-feature</module>
-		<module>releng/org.eclipse.cdt.platform.source-feature</module>
 		<module>releng/org.eclipse.cdt-feature</module>
 		
 		<module>core/org.eclipse.cdt.core</module>
