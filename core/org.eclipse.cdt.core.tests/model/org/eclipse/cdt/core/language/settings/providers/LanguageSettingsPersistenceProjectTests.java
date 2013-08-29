@@ -1590,6 +1590,24 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 								}
 //								} else if (LocalFileNatives.isUsingNatives()) {
 //									DELEGATE = new LocalFileHandler();
+								try {
+									boolean hasNatives = false;
+									final String LIBRARY_NAME = "localfile_1_0_0";
+									System.loadLibrary(LIBRARY_NAME);
+									hasNatives = true;
+									usingNatives = "LocalFileNatives";
+//									isUnicode = internalIsUnicode();
+//									try {
+//										nativeAttributes = nativeAttributes();
+//									} catch (UnsatisfiedLinkError e) {
+//										// older native implementations did not support this
+//										// call, so we need to handle the error silently
+//									}
+								} catch (UnsatisfiedLinkError e) {
+//									if (isLibraryPresent())
+//										logMissingNativeLibrary(e);
+								}
+
 //								}
 								FileInfo info_1 = LocalFileNativesManager.fetchFileInfo(filePath);
 								//natives don't set the file name on all platforms
