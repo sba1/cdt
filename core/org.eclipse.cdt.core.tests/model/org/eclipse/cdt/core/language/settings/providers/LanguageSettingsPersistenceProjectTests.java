@@ -1548,7 +1548,19 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				// TODO
 				// Refresh storage in workspace
 				xmlStorageFilePrj.refreshLocal(IResource.DEPTH_ZERO, null);
-				boolean isSynchronized = fastIsSynchronized((File) xmlStorageFilePrj);
+				boolean isSynchronized/* = fastIsSynchronized((File) xmlStorageFilePrj)*/;
+				File target = (File) xmlStorageFilePrj;
+				{
+					boolean result = false;
+					ResourceInfo info = target.getResourceInfo(false, false);
+					if (target.exists(target.getFlags(info), true)) {
+						IFileInfo fileInfo = target.getLocalManager().getStore(target).fetchInfo();
+						if (/*!fileInfo.isDirectory() && */info.getLocalSyncInfo() == fileInfo.getLastModified())
+							result = true;
+					}
+//					return result;
+					isSynchronized = result;
+				}
 				boolean isSynchronized_1 = fastIsSynchronized((File) xmlStorageFilePrj);
 				boolean exists = xmlStorageFilePrj.exists();
 				boolean isSynchronized_2 = fastIsSynchronized((File) xmlStorageFilePrj);
@@ -1594,13 +1606,14 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 	}
 
 	public boolean fastIsSynchronized(File target) {
+		boolean result = false;
 		ResourceInfo info = target.getResourceInfo(false, false);
 		if (target.exists(target.getFlags(info), true)) {
 			IFileInfo fileInfo = target.getLocalManager().getStore(target).fetchInfo();
 			if (!fileInfo.isDirectory() && info.getLocalSyncInfo() == fileInfo.getLastModified())
-				return true;
+				result = true;
 		}
-		return false;
+		return result;
 	}
 
 	/**
