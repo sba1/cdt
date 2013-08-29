@@ -1574,7 +1574,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 								{
 									final String LIBRARY_NAME = "unixfile_1_0_0";
 									boolean _usingNatives = false;
-									int _libattr = 0;
+//									int _libattr = 0;
 									try {
 										System.loadLibrary(LIBRARY_NAME);
 										_usingNatives = true;
@@ -1626,6 +1626,8 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 						}
 						if (/*!fileInfo.isDirectory() && */info.getLocalSyncInfo() == fileInfo.getLastModified())
 							result = true;
+					} else {
+						point += "X";
 					}
 //					return result;
 					isSynchronized = result;
