@@ -1550,8 +1550,10 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				assertFalse("File "+xmlFileOut+ " still exist", xmlFileOut.exists());
 
 				// TODO
+				boolean isSynchronized_0 = fastIsSynchronized((File) xmlStorageFilePrj);
 				// Refresh storage in workspace
 				xmlStorageFilePrj.refreshLocal(IResource.DEPTH_ZERO, null);
+
 				boolean isSynchronized/* = fastIsSynchronized((File) xmlStorageFilePrj)*/;
 				File target = (File) xmlStorageFilePrj;
 				String point = "";
@@ -1653,7 +1655,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				boolean isSynchronized_1 = fastIsSynchronized((File) xmlStorageFilePrj);
 				boolean exists = xmlStorageFilePrj.exists();
 				boolean isSynchronized_2 = fastIsSynchronized((File) xmlStorageFilePrj);
-				assertTrue("i=" + i + ", point=" + point + ", " + usingNatives + ", sync=" + isSynchronized + "," + isSynchronized_1 + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
+				assertTrue("i=" + i + ", point=" + point + ", " + usingNatives + ", sync=" + isSynchronized_0 + "," + isSynchronized + "," + isSynchronized_1 + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
 
 
 				// and close
