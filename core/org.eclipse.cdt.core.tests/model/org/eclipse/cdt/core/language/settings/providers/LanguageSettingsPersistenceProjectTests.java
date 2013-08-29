@@ -29,7 +29,11 @@ import org.eclipse.cdt.core.testplugin.util.BaseTestCase;
 import org.eclipse.cdt.internal.core.XmlUtil;
 import org.eclipse.cdt.internal.core.language.settings.providers.LanguageSettingsProvidersSerializer;
 import org.eclipse.cdt.internal.core.settings.model.CProjectDescriptionManager;
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
+import org.eclipse.core.filesystem.provider.FileInfo;
+import org.eclipse.core.internal.filesystem.local.LocalFile;
+import org.eclipse.core.internal.filesystem.local.LocalFileNativesManager;
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.internal.resources.ResourceInfo;
 import org.eclipse.core.resources.IFile;
@@ -1554,7 +1558,45 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 					boolean result = false;
 					ResourceInfo info = target.getResourceInfo(false, false);
 					if (target.exists(target.getFlags(info), true)) {
-						IFileInfo fileInfo = target.getLocalManager().getStore(target).fetchInfo();
+						LocalFile store = (LocalFile) target.getLocalManager().getStore(target);
+//						IFileInfo fileInfo = store.fetchInfo();
+//						IFileInfo fileInfo =  (FileInfo) store.fetchInfo(EFS.NONE, null);
+//						IFileInfo fileInfo = store.fetchInfo(EFS.NONE, null);
+						IFileInfo fileInfo;
+						java.io.File file = store.toLocalFile(0, null);
+						String filePath = file.getAbsolutePath();
+						{
+							if (LocalFileNativesManager.isUsingNatives()) {
+								FileInfo info_1 = LocalFileNativesManager.fetchFileInfo(filePath);
+								//natives don't set the file name on all platforms
+								if (info_1.getName().length() == 0) {
+									String name = file.getName();
+									//Bug 294429: make sure that substring baggage is removed
+									info_1.setName(new String(name.toCharArray()));
+								}
+								fileInfo = info_1;
+//								return info_1;
+							} else {
+								//in-lined non-native implementation
+								FileInfo info_1 = new FileInfo(file.getName());
+								final long lastModified = file.lastModified();
+								if (lastModified <= 0) {
+									//if the file doesn't exist, all other attributes should be default values
+									info_1.setExists(false);
+//									return info_1;
+									fileInfo = info_1;
+								} else {
+									info_1.setLastModified(lastModified);
+									info_1.setExists(true);
+									info_1.setLength(file.length());
+									info_1.setDirectory(file.isDirectory());
+									info_1.setAttribute(EFS.ATTRIBUTE_READ_ONLY, file.exists() && !file.canWrite());
+									info_1.setAttribute(EFS.ATTRIBUTE_HIDDEN, file.isHidden());
+//									return info_1;
+									fileInfo = info_1;
+								}
+							}
+						}
 						if (/*!fileInfo.isDirectory() && */info.getLocalSyncInfo() == fileInfo.getLastModified())
 							result = true;
 					}
