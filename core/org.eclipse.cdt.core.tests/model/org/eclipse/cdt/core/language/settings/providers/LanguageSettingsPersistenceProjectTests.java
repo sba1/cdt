@@ -29,6 +29,7 @@ import org.eclipse.cdt.core.testplugin.util.BaseTestCase;
 import org.eclipse.cdt.internal.core.XmlUtil;
 import org.eclipse.cdt.internal.core.language.settings.providers.LanguageSettingsProvidersSerializer;
 import org.eclipse.cdt.internal.core.settings.model.CProjectDescriptionManager;
+import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -1544,7 +1545,9 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 
 				// Refresh storage in workspace
 				xmlStorageFilePrj.refreshLocal(IResource.DEPTH_ZERO, null);
-				assertTrue("i=" + i + ": File "+xmlStorageFilePrj+ " does not exist", xmlStorageFilePrj.exists());
+				boolean isSynchronized = ((File)xmlStorageFilePrj).getLocalManager().fastIsSynchronized((File) xmlStorageFilePrj);
+				boolean exists = xmlStorageFilePrj.exists();
+				assertTrue("i=" + i + ", sync=" + isSynchronized + ": File "+xmlStorageFilePrj+ " does not exist", exists);
 
 
 				// and close
