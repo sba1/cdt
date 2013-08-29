@@ -1554,6 +1554,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				xmlStorageFilePrj.refreshLocal(IResource.DEPTH_ZERO, null);
 				boolean isSynchronized/* = fastIsSynchronized((File) xmlStorageFilePrj)*/;
 				File target = (File) xmlStorageFilePrj;
+				String point = "";
 				{
 					boolean result = false;
 					ResourceInfo info = target.getResourceInfo(false, false);
@@ -1574,8 +1575,9 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 									//Bug 294429: make sure that substring baggage is removed
 									info_1.setName(new String(name.toCharArray()));
 								}
-								fileInfo = info_1;
 //								return info_1;
+								fileInfo = info_1;
+								point += "E";
 							} else {
 								//in-lined non-native implementation
 								FileInfo info_1 = new FileInfo(file.getName());
@@ -1585,6 +1587,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 									info_1.setExists(false);
 //									return info_1;
 									fileInfo = info_1;
+									point += "K";
 								} else {
 									info_1.setLastModified(lastModified);
 									info_1.setExists(true);
@@ -1594,6 +1597,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 									info_1.setAttribute(EFS.ATTRIBUTE_HIDDEN, file.isHidden());
 //									return info_1;
 									fileInfo = info_1;
+									point += "P";
 								}
 							}
 						}
@@ -1606,7 +1610,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				boolean isSynchronized_1 = fastIsSynchronized((File) xmlStorageFilePrj);
 				boolean exists = xmlStorageFilePrj.exists();
 				boolean isSynchronized_2 = fastIsSynchronized((File) xmlStorageFilePrj);
-				assertTrue("i=" + i + ", sync=" + isSynchronized + "," + isSynchronized_1 + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
+				assertTrue("i=" + i + ", point=" + point + " ,sync=" + isSynchronized + "," + isSynchronized_1 + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
 
 
 				// and close
