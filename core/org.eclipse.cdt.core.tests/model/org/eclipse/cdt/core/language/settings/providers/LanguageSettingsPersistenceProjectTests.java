@@ -29,7 +29,9 @@ import org.eclipse.cdt.core.testplugin.util.BaseTestCase;
 import org.eclipse.cdt.internal.core.XmlUtil;
 import org.eclipse.cdt.internal.core.language.settings.providers.LanguageSettingsProvidersSerializer;
 import org.eclipse.cdt.internal.core.settings.model.CProjectDescriptionManager;
+import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.internal.resources.File;
+import org.eclipse.core.internal.resources.ResourceInfo;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -1543,11 +1545,13 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				assertTrue("File "+xmlFile+ " does not exist", xmlFile.exists());
 				assertFalse("File "+xmlFileOut+ " still exist", xmlFileOut.exists());
 
+				// TODO
 				// Refresh storage in workspace
 				xmlStorageFilePrj.refreshLocal(IResource.DEPTH_ZERO, null);
-				boolean isSynchronized = ((File)xmlStorageFilePrj).getLocalManager().fastIsSynchronized((File) xmlStorageFilePrj);
+				boolean isSynchronized = fastIsSynchronized((File) xmlStorageFilePrj);
 				boolean exists = xmlStorageFilePrj.exists();
-				assertTrue("i=" + i + ", sync=" + isSynchronized + ": File "+xmlStorageFilePrj+ " does not exist", exists);
+				boolean isSynchronized_2 = fastIsSynchronized((File) xmlStorageFilePrj);
+				assertTrue("i=" + i + ", sync=" + isSynchronized + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
 
 
 				// and close
@@ -1586,6 +1590,16 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				assertEquals(entries.size(), actual.size());
 			}
 		}
+	}
+
+	public boolean fastIsSynchronized(File target) {
+		ResourceInfo info = target.getResourceInfo(false, false);
+		if (target.exists(target.getFlags(info), true)) {
+			IFileInfo fileInfo = target.getLocalManager().getStore(target).fetchInfo();
+			if (!fileInfo.isDirectory() && info.getLocalSyncInfo() == fileInfo.getLastModified())
+				return true;
+		}
+		return false;
 	}
 
 	/**
