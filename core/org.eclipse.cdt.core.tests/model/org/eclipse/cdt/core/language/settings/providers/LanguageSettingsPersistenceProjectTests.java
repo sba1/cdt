@@ -1424,7 +1424,8 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 	 * Test split storage in a real project 100 times.
 	 */
 	public void testProjectPersistence_RealProjectSplitStorage_100() throws Exception {
-		String usingNatives = "";
+		// TODO
+		String usingNatives = "LocalFileNativesManager.DEFAULT";
 		if (LocalFileNativesManager.isUsingNatives()) {
 //			if (UnixFileNatives.isUsingNatives()) {
 //				DELEGATE = new UnixFileHandler();
@@ -1464,7 +1465,27 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 //				if (isLibraryPresent())
 //					logMissingNativeLibrary(e);
 			}
-
+//		} else {
+			try {
+				Class c = LocalFileNativesManager.class.getClassLoader().loadClass("org.eclipse.core.internal.filesystem.jdk7.Java7Handler"); //$NON-NLS-1$
+//				DELEGATE = (NativeHandler) c.newInstance();
+				usingNatives = "Java7Handler";
+			} catch (ClassNotFoundException e) {
+				// Class was missing?
+				// Leave the delegate as default
+			} catch (LinkageError e) {
+				// Maybe the bundle was somehow loaded, the class was there but the bytecodes were the wrong version?
+				// Leave the delegate as default
+//			} catch (IllegalAccessException e) {
+//				// We could not instantiate the object because we have no access
+//				// Leave delegate as default
+//			} catch (InstantiationException e) {
+//				// We could not instantiate the object because of something unexpected
+//				// Leave delegate as default
+			} catch (ClassCastException e) {
+				// The handler does not inherit from the correct class
+				// Leave delegate as default
+			}
 //			}
 		}
 
