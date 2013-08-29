@@ -1555,6 +1555,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				boolean isSynchronized/* = fastIsSynchronized((File) xmlStorageFilePrj)*/;
 				File target = (File) xmlStorageFilePrj;
 				String point = "";
+				String usingNatives = "";
 				{
 					boolean result = false;
 					ResourceInfo info = target.getResourceInfo(false, false);
@@ -1568,6 +1569,28 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 						String filePath = file.getAbsolutePath();
 						{
 							if (LocalFileNativesManager.isUsingNatives()) {
+//								if (UnixFileNatives.isUsingNatives()) {
+//									DELEGATE = new UnixFileHandler();
+								{
+									final String LIBRARY_NAME = "unixfile_1_0_0";
+									boolean _usingNatives = false;
+									int _libattr = 0;
+									try {
+										System.loadLibrary(LIBRARY_NAME);
+										_usingNatives = true;
+										usingNatives = "UnixFileNatives";
+//										_libattr = libattr();
+									} catch (UnsatisfiedLinkError e) {
+//										if (isLibraryPresent())
+//											logMissingNativeLibrary(e);
+//									} finally {
+//										usingNatives = _usingNatives;
+//										libattr = _libattr;
+									}
+								}
+//								} else if (LocalFileNatives.isUsingNatives()) {
+//									DELEGATE = new LocalFileHandler();
+//								}
 								FileInfo info_1 = LocalFileNativesManager.fetchFileInfo(filePath);
 								//natives don't set the file name on all platforms
 								if (info_1.getName().length() == 0) {
@@ -1610,7 +1633,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				boolean isSynchronized_1 = fastIsSynchronized((File) xmlStorageFilePrj);
 				boolean exists = xmlStorageFilePrj.exists();
 				boolean isSynchronized_2 = fastIsSynchronized((File) xmlStorageFilePrj);
-				assertTrue("i=" + i + ", point=" + point + " ,sync=" + isSynchronized + "," + isSynchronized_1 + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
+				assertTrue("i=" + i + ", point=" + point + ", " + usingNatives + ", sync=" + isSynchronized + "," + isSynchronized_1 + "," + isSynchronized_2 + ": File "+xmlStorageFilePrj+ " does not exist", exists);
 
 
 				// and close
