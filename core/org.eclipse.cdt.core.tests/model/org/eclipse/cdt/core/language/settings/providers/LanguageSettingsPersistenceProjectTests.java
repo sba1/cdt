@@ -1424,6 +1424,50 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 	 * Test split storage in a real project 100 times.
 	 */
 	public void testProjectPersistence_RealProjectSplitStorage_100() throws Exception {
+		String usingNatives = "";
+		if (LocalFileNativesManager.isUsingNatives()) {
+//			if (UnixFileNatives.isUsingNatives()) {
+//				DELEGATE = new UnixFileHandler();
+			{
+				final String LIBRARY_NAME = "unixfile_1_0_0";
+				boolean _usingNatives = false;
+//				int _libattr = 0;
+				try {
+					System.loadLibrary(LIBRARY_NAME);
+					_usingNatives = true;
+					usingNatives = "UnixFileNatives";
+//					_libattr = libattr();
+				} catch (UnsatisfiedLinkError e) {
+//					if (isLibraryPresent())
+//						logMissingNativeLibrary(e);
+//				} finally {
+//					usingNatives = _usingNatives;
+//					libattr = _libattr;
+				}
+			}
+//			} else if (LocalFileNatives.isUsingNatives()) {
+//				DELEGATE = new LocalFileHandler();
+			try {
+				boolean hasNatives = false;
+				final String LIBRARY_NAME = "localfile_1_0_0";
+				System.loadLibrary(LIBRARY_NAME);
+				hasNatives = true;
+				usingNatives = "LocalFileNatives";
+//				isUnicode = internalIsUnicode();
+//				try {
+//					nativeAttributes = nativeAttributes();
+//				} catch (UnsatisfiedLinkError e) {
+//					// older native implementations did not support this
+//					// call, so we need to handle the error silently
+//				}
+			} catch (UnsatisfiedLinkError e) {
+//				if (isLibraryPresent())
+//					logMissingNativeLibrary(e);
+			}
+
+//			}
+		}
+
 		for (int i=1; i<=100; i++) {
 			IProject project = ResourceHelper.createCDTProjectWithConfig(this.getName() + '_' + i);
 			IFile xmlStorageFilePrj;
@@ -1553,7 +1597,6 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 				boolean isSynchronized_0/* = fastIsSynchronized((File) xmlStorageFilePrj)*/;
 				File target = (File) xmlStorageFilePrj;
 				String point = "";
-				String usingNatives = "";
 				{
 					boolean result = false;
 					ResourceInfo info = target.getResourceInfo(false, false);
@@ -1567,46 +1610,6 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 						String filePath = file.getAbsolutePath();
 						{
 							if (LocalFileNativesManager.isUsingNatives()) {
-//								if (UnixFileNatives.isUsingNatives()) {
-//									DELEGATE = new UnixFileHandler();
-								{
-									final String LIBRARY_NAME = "unixfile_1_0_0";
-									boolean _usingNatives = false;
-//									int _libattr = 0;
-									try {
-										System.loadLibrary(LIBRARY_NAME);
-										_usingNatives = true;
-										usingNatives = "UnixFileNatives";
-//										_libattr = libattr();
-									} catch (UnsatisfiedLinkError e) {
-//										if (isLibraryPresent())
-//											logMissingNativeLibrary(e);
-//									} finally {
-//										usingNatives = _usingNatives;
-//										libattr = _libattr;
-									}
-								}
-//								} else if (LocalFileNatives.isUsingNatives()) {
-//									DELEGATE = new LocalFileHandler();
-								try {
-									boolean hasNatives = false;
-									final String LIBRARY_NAME = "localfile_1_0_0";
-									System.loadLibrary(LIBRARY_NAME);
-									hasNatives = true;
-									usingNatives = "LocalFileNatives";
-//									isUnicode = internalIsUnicode();
-//									try {
-//										nativeAttributes = nativeAttributes();
-//									} catch (UnsatisfiedLinkError e) {
-//										// older native implementations did not support this
-//										// call, so we need to handle the error silently
-//									}
-								} catch (UnsatisfiedLinkError e) {
-//									if (isLibraryPresent())
-//										logMissingNativeLibrary(e);
-								}
-
-//								}
 								FileInfo info_1 = LocalFileNativesManager.fetchFileInfo(filePath);
 								//natives don't set the file name on all platforms
 								if (info_1.getName().length() == 0) {
