@@ -41,15 +41,9 @@
 	</licenses>
 
 	<modules>
-		<module>releng/org.eclipse.cdt</module>
-		<module>releng/org.eclipse.cdt-feature</module>
-		
 		<module>core/org.eclipse.cdt.core</module>
 		<module>core/org.eclipse.cdt.core.tests</module>
 		<module>core/org.eclipse.cdt.ui</module>
-
-		
-		<module>releng/org.eclipse.cdt.repo</module>
 	</modules>
 
 	<repositories>
