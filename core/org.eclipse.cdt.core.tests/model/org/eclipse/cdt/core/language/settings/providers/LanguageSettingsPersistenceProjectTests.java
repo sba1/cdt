@@ -1427,6 +1427,7 @@ public class LanguageSettingsPersistenceProjectTests extends BaseTestCase {
 		// TODO
 		String usingNatives = "LocalFileNativesManager.DEFAULT";
 		if (LocalFileNativesManager.isUsingNatives()) {
+			usingNatives = "LocalFileNativesManager.isUsingNatives";
 //			if (UnixFileNatives.isUsingNatives()) {
 //				DELEGATE = new UnixFileHandler();
 			{
