@@ -16,7 +16,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.cdt.core.language.settings.providers.AllLanguageSettingsProvidersCoreTests;
+import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsPersistenceProjectTests;
 
 /**
  * @author vhirsl
@@ -71,7 +71,7 @@ public class AutomatedIntegrationSuite extends TestSuite {
 //
 //		suite.addTest(RefreshScopeTests.suite());
 		
-		suite.addTest(AllLanguageSettingsProvidersCoreTests.suite());
+		suite.addTest(LanguageSettingsPersistenceProjectTests.suite());
 
 		return suite;
 	}
