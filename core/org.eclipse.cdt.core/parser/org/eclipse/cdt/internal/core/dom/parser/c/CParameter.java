@@ -23,6 +23,7 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IBinding;
+import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.dom.ast.IScope;
 import org.eclipse.cdt.core.dom.ast.IType;
@@ -32,6 +33,7 @@ import org.eclipse.cdt.core.parser.util.ArrayUtil;
 import org.eclipse.cdt.core.parser.util.CharArrayUtils;
 import org.eclipse.cdt.internal.core.dom.Linkage;
 import org.eclipse.cdt.internal.core.dom.parser.ProblemBinding;
+import org.eclipse.cdt.internal.core.doxygen.DoxygenUtil;
 import org.eclipse.core.runtime.PlatformObject;
 
 /**
@@ -47,8 +49,38 @@ public class CParameter extends PlatformObject implements IParameter {
 	private IASTName[] declarations;
 	private IType type = null;
 
+	/** The description of this parameter */
+	private String description;
+
 	public CParameter(IASTName parameterName) {
 		this.declarations = new IASTName[] { parameterName };
+
+		updateDescription(parameterName);
+	}
+
+	private void updateDescription(IASTName parameterName) {
+		if (parameterName.getParent() != null && parameterName.getParent().getParent() != null) {
+			IASTNode node = parameterName.getParent().getParent();
+			if (node instanceof IASTParameterDeclaration) {
+				if (description == null || description.length() == 0) {
+					description = DoxygenUtil.getDescription(node);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter.isAssignableFrom(IDescription.class)) {
+			return new IDescription() {
+				@Override
+				public String getDescription() {
+					return description;
+				}
+			};
+		}
+		return super.getAdapter(adapter);
 	}
 
 	@Override
@@ -122,8 +154,10 @@ public class CParameter extends PlatformObject implements IParameter {
 	 * @param name the name from a parameter declaration
 	 */
 	public void addDeclaration(IASTName name) {
-		if (name != null && name.isActive())
+		if (name != null && name.isActive()) {
 			declarations = ArrayUtil.append(IASTName.class, declarations, name);
+			updateDescription(name);
+		}
 	}
 
 	@Override
