@@ -38,7 +38,7 @@ import org.eclipse.cdt.core.parser.util.AttributeUtil;
 import org.eclipse.cdt.core.parser.util.CharArrayUtils;
 import org.eclipse.cdt.internal.core.dom.Linkage;
 import org.eclipse.cdt.internal.core.dom.parser.ASTQueries;
-import org.eclipse.cdt.internal.core.doxygen.IDoxygenMap;
+import org.eclipse.cdt.internal.core.doxygen.DoxygenUtil;
 import org.eclipse.core.runtime.PlatformObject;
 
 /**
@@ -72,12 +72,9 @@ public class CFunction extends PlatformObject implements IFunction, ICInternalFu
 				declarators = ArrayUtil.append(IASTDeclarator.class, declarators, declarator);
 			}
 
-			IDoxygenMap doxygenMap = (IDoxygenMap)declarator.getTranslationUnit().getAdapter(IDoxygenMap.class);
-			if (doxygenMap != null) {
-				/* TODO: Accumulate somehow if multiple description exists */
-				if (description == null || description.length() == 0) {
-					description = doxygenMap.get(declarator);
-				}
+			/* TODO: Accumulate somehow if multiple description exists */
+			if (description == null || description.length() == 0) {
+				description = DoxygenUtil.getDescription(declarator);
 			}
 		}
 	}
