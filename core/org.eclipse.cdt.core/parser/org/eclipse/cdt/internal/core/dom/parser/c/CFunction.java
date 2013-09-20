@@ -13,6 +13,7 @@
 package org.eclipse.cdt.internal.core.dom.parser.c;
 
 import org.eclipse.cdt.core.dom.ILinkage;
+import org.eclipse.cdt.core.dom.ast.AbstractBinding;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
@@ -25,7 +26,6 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
-import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.dom.ast.IFunction;
 import org.eclipse.cdt.core.dom.ast.IFunctionType;
 import org.eclipse.cdt.core.dom.ast.IParameter;
@@ -38,13 +38,11 @@ import org.eclipse.cdt.core.parser.util.AttributeUtil;
 import org.eclipse.cdt.core.parser.util.CharArrayUtils;
 import org.eclipse.cdt.internal.core.dom.Linkage;
 import org.eclipse.cdt.internal.core.dom.parser.ASTQueries;
-import org.eclipse.cdt.internal.core.doxygen.DoxygenUtil;
-import org.eclipse.core.runtime.PlatformObject;
 
 /**
  * Represents a function.
  */
-public class CFunction extends PlatformObject implements IFunction, ICInternalFunction {
+public class CFunction extends AbstractBinding implements IFunction, ICInternalFunction {
 	private IASTDeclarator[] declarators;
 	private IASTFunctionDeclarator definition;
 
@@ -53,9 +51,6 @@ public class CFunction extends PlatformObject implements IFunction, ICInternalFu
 	private int bits = 0;
 
 	protected IFunctionType type;
-
-	/** The description of this function */
-	private String description;
 
 	public CFunction(IASTDeclarator declarator) {
 		storeDeclarator(declarator);
@@ -71,26 +66,8 @@ public class CFunction extends PlatformObject implements IFunction, ICInternalFu
 			} else {
 				declarators = ArrayUtil.append(IASTDeclarator.class, declarators, declarator);
 			}
-
-			/* TODO: Accumulate somehow if multiple description exists */
-			if (description == null || description.length() == 0) {
-				description = DoxygenUtil.getDescription(declarator);
-			}
+			updateDescription(declarator);
 		}
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Override
-	public Object getAdapter(Class adapter) {
-		if (adapter.isAssignableFrom(IDescription.class)) {
-			return new IDescription() {
-				@Override
-				public String getDescription() {
-					return description;
-				}
-			};
-		}
-		return super.getAdapter(adapter);
 	}
 
 	@Override
