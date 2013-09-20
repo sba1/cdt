@@ -25,7 +25,6 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.ui.CUIPlugin;
 
 import org.eclipse.cdt.internal.core.CCoreInternals;
-import org.eclipse.cdt.internal.core.index.IIndexFragmentBinding;
 
 /**
  * Class implementing a text hover using description stored in the IBinding.
@@ -68,7 +67,7 @@ public class DescriptionHover extends AbstractCEditorTextHover {
 		IASTTranslationUnit ast = itu.getAST();
 		ast.accept(visit);
 
-		final IBinding binding = name.resolveBinding();
+		IBinding binding = name.resolveBinding();
 		IDescription desc = (IDescription)binding.getAdapter(IDescription.class);
 		String description = null;
 		if (desc != null)
@@ -76,8 +75,8 @@ public class DescriptionHover extends AbstractCEditorTextHover {
 
 		if (description == null || description.length() == 0) {
 			/* Attempt to find the description via the pdom/index */
-			IIndexFragmentBinding indexBinding = CCoreInternals.getPDOMManager().getPDOM(itu.getCProject()).findBinding(name);
-			desc = (IDescription)indexBinding.getAdapter(IDescription.class);
+			binding = CCoreInternals.getPDOMManager().getPDOM(itu.getCProject()).findBinding(name);
+			desc = (IDescription)binding.getAdapter(IDescription.class);
 		}
 
 		if (desc != null) {
