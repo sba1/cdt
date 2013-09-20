@@ -11,6 +11,7 @@
 
 package org.eclipse.cdt.internal.ui.text.c.hover;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.ui.IEditorInput;
@@ -39,37 +40,50 @@ public class DescriptionHover extends AbstractCEditorTextHover {
 		ITranslationUnit itu = CUIPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
 
 		try {
-			ASTVisitor visit = new ASTVisitor(true) {
-				@Override
-				public int visit(IASTName name) {
-					name.resolveBinding();
-					return PROCESS_CONTINUE;
-				}
-			};
-			IASTTranslationUnit ast = itu.getAST();
-			ast.accept(visit);
+			IASTName hoveredName = itu.getAST().getNodeSelector(null).findEnclosingName(hoverRegion.getOffset(), 1);
 
-			IASTName hoveredName = ast.getNodeSelector(null).findEnclosingName(hoverRegion.getOffset(), 1);
-
-			final IBinding binding = hoveredName.resolveBinding();
-			IDescription desc = (IDescription)binding.getAdapter(IDescription.class);
-			String description = null;
-			if (desc != null)
-				description = desc.getDescription();
-
-			if (description == null || description.length() == 0) {
-				/* Attempt to find the description via the pdom/index */
-				IIndexFragmentBinding indexBinding = CCoreInternals.getPDOMManager().getPDOM(itu.getCProject()).findBinding(hoveredName);
-				desc = (IDescription)indexBinding.getAdapter(IDescription.class);
-			}
-
-			if (desc != null) {
-				description = desc.getDescription();
-				if (description != null && description.length() > 0)
-					return description;
-			}
+			return getDescription(itu, hoveredName);
 		} catch (Exception e) {
 			/* Ignore */
+		}
+		return null;
+	}
+
+	/**
+	 * Return the description string for the given name in the given translation unit.
+	 *
+	 * @param itu
+	 * @param name
+	 * @return
+	 * @throws CoreException
+	 */
+	private String getDescription(ITranslationUnit itu, IASTName name) throws CoreException {
+		ASTVisitor visit = new ASTVisitor(true) {
+			@Override
+			public int visit(IASTName name) {
+				name.resolveBinding();
+				return PROCESS_CONTINUE;
+			}
+		};
+		IASTTranslationUnit ast = itu.getAST();
+		ast.accept(visit);
+
+		final IBinding binding = name.resolveBinding();
+		IDescription desc = (IDescription)binding.getAdapter(IDescription.class);
+		String description = null;
+		if (desc != null)
+			description = desc.getDescription();
+
+		if (description == null || description.length() == 0) {
+			/* Attempt to find the description via the pdom/index */
+			IIndexFragmentBinding indexBinding = CCoreInternals.getPDOMManager().getPDOM(itu.getCProject()).findBinding(name);
+			desc = (IDescription)indexBinding.getAdapter(IDescription.class);
+		}
+
+		if (desc != null) {
+			description = desc.getDescription();
+			if (description != null && description.length() > 0)
+				return description;
 		}
 		return null;
 	}
