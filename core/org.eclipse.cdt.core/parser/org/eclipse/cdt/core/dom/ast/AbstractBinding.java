@@ -7,16 +7,21 @@ public abstract class AbstractBinding extends PlatformObject implements IBinding
 	/** The description of this binding */
 	private String description;
 
+	private IDescription descriptionAdapter;
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter.isAssignableFrom(IDescription.class)) {
-			return new IDescription() {
-				@Override
-				public String getDescription() {
-					return description;
-				}
-			};
+			if (descriptionAdapter == null) {
+				descriptionAdapter = new IDescription() {
+					@Override
+					public String getDescription() {
+						return description;
+					}
+				};
+			}
+			return descriptionAdapter;
 		}
 		return super.getAdapter(adapter);
 	}
