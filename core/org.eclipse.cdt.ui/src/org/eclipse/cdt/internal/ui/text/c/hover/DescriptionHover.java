@@ -21,6 +21,8 @@ import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IDescription;
+import org.eclipse.cdt.core.dom.ast.IFunction;
+import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.ui.CUIPlugin;
 
@@ -68,19 +70,46 @@ public class DescriptionHover extends AbstractCEditorTextHover {
 		ast.accept(visit);
 
 		IBinding binding = name.resolveBinding();
-		IDescription desc = (IDescription)binding.getAdapter(IDescription.class);
 		String description = null;
-		if (desc != null)
-			description = desc.getDescription();
+		IDescription desc = null;
+		if (binding != null) {
+			desc = (IDescription)binding.getAdapter(IDescription.class);
+			if (desc != null)
+				description = desc.getDescription();
+		}
 
 		if (description == null || description.length() == 0) {
 			/* Attempt to find the description via the pdom/index */
 			binding = CCoreInternals.getPDOMManager().getPDOM(itu.getCProject()).findBinding(name);
-			desc = (IDescription)binding.getAdapter(IDescription.class);
+			if (binding != null)
+				desc = (IDescription)binding.getAdapter(IDescription.class);
+		}
+
+		/* Parameter description */
+		StringBuilder parameterDescription = new StringBuilder();
+		if (binding instanceof IFunction) {
+			IFunction function = (IFunction)binding;
+			for (IParameter p : function.getParameters()) {
+				IDescription pDesc = (IDescription)p.getAdapter(IDescription.class);
+
+				parameterDescription.append("<b>"); //$NON-NLS-1$
+				parameterDescription.append(p.getName());
+				parameterDescription.append(":</b> "); //$NON-NLS-1$
+				if (pDesc != null) {
+					parameterDescription.append(pDesc.getDescription());
+				}
+				parameterDescription.append("<br>"); //$NON-NLS-1$
+			}
 		}
 
 		if (desc != null) {
 			description = desc.getDescription();
+			if (description == null || description.length() == 0) {
+				description = parameterDescription.toString();
+			} else {
+				description = description + "<br>" + parameterDescription.toString(); //$NON-NLS-1$
+			}
+
 			if (description != null && description.length() > 0)
 				return description;
 		}
