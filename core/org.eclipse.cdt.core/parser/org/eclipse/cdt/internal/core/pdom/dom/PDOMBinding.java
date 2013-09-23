@@ -20,6 +20,7 @@ import org.eclipse.cdt.core.dom.ast.ASTTypeUtil;
 import org.eclipse.cdt.core.dom.ast.DOMException;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IBinding;
+import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.dom.ast.IFunction;
 import org.eclipse.cdt.core.dom.ast.IFunctionType;
 import org.eclipse.cdt.core.dom.ast.IScope.ScopeLookupData;
@@ -50,9 +51,10 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 	private static final int FIRST_DEF_OFFSET    = PDOMNamedNode.RECORD_SIZE + 4; // size 4
 	private static final int FIRST_REF_OFFSET    = PDOMNamedNode.RECORD_SIZE + 8; // size 4
 	private static final int LOCAL_TO_FILE		 = PDOMNamedNode.RECORD_SIZE + 12; // size 4
+	private static final int DESCRIPTION         = PDOMNamedNode.RECORD_SIZE + 16; // size 4
 
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = PDOMNamedNode.RECORD_SIZE + 16;
+	protected static final int RECORD_SIZE = PDOMNamedNode.RECORD_SIZE + 20;
 	private byte hasDeclaration= -1;
 
 	protected PDOMBinding(PDOMLinkage linkage, PDOMNode parent, char[] name) throws CoreException {
@@ -77,6 +79,21 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 		// to clear out all tags for the binding.
 		if (adapter.isAssignableFrom(ITagReader.class))
 			return new PDOMTaggable(getPDOM(), getRecord());
+
+		if (adapter.isAssignableFrom(IDescription.class)) {
+			return new IDescription() {
+				@Override
+				public String getDescription() {
+					Database db= getDB();
+					try {
+						IString str = db.getString(db.getRecPtr(record + DESCRIPTION));
+						return str.getString();
+					} catch (CoreException e) {
+						return null;
+					}
+				}
+			};
+		}
 
 		return null;
 	}
@@ -452,5 +469,21 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 
 	public IBinding[] getBindings(ScopeLookupData lookup) {
 		return IBinding.EMPTY_BINDING_ARRAY;
+	}
+
+	/**
+	 * Set the description string of this binding.
+	 *
+	 * @param description
+	 * @throws CoreException
+	 */
+	protected void setDescription(String description) throws CoreException {
+		final Database db= getDB();
+		if (description != null) {
+			long docRecord = db.newString(description).getRecord();
+			db.putRecPtr(record + DESCRIPTION, docRecord);
+		} else {
+			db.putRecPtr(record + DESCRIPTION, 0);
+		}
 	}
 }

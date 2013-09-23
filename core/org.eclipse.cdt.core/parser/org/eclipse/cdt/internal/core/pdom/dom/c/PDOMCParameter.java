@@ -13,6 +13,7 @@
 package org.eclipse.cdt.internal.core.pdom.dom.c;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.IValue;
@@ -21,6 +22,7 @@ import org.eclipse.cdt.internal.core.index.IIndexCBindingConstants;
 import org.eclipse.cdt.internal.core.index.IIndexFragment;
 import org.eclipse.cdt.internal.core.index.IIndexScope;
 import org.eclipse.cdt.internal.core.pdom.db.Database;
+import org.eclipse.cdt.internal.core.pdom.db.IString;
 import org.eclipse.cdt.internal.core.pdom.dom.IPDOMBinding;
 import org.eclipse.cdt.internal.core.pdom.dom.PDOMLinkage;
 import org.eclipse.cdt.internal.core.pdom.dom.PDOMNamedNode;
@@ -32,7 +34,8 @@ import org.eclipse.core.runtime.CoreException;
  */
 final class PDOMCParameter extends PDOMNamedNode implements IParameter, IPDOMBinding {
 	private static final int NEXT_PARAM = PDOMNamedNode.RECORD_SIZE;
-	private static final int FLAG_OFFSET = NEXT_PARAM + Database.PTR_SIZE;
+	private static final int DESCRIPTION = NEXT_PARAM + Database.PTR_SIZE;
+	private static final int FLAG_OFFSET = DESCRIPTION + Database.PTR_SIZE;
 	@SuppressWarnings("hiding")
 	public static final int RECORD_SIZE = FLAG_OFFSET + 1;
 	static {
@@ -55,6 +58,15 @@ final class PDOMCParameter extends PDOMNamedNode implements IParameter, IPDOMBin
 		db.putRecPtr(record + NEXT_PARAM, 0);
 		db.putRecPtr(record + NEXT_PARAM, next == null ? 0 : next.getRecord());
 		db.putByte(record + FLAG_OFFSET, encodeFlags(param));
+		db.putRecPtr(record + DESCRIPTION, 0);
+		IDescription desc = (IDescription)param.getAdapter(IDescription.class);
+		if (desc != null) {
+			String d = desc.getDescription();
+			if (d != null && d.length() > 0) {
+				long docRecord = db.newString(d).getRecord();
+				db.putRecPtr(record + DESCRIPTION, docRecord);
+			}
+		}
 	}
 
 	@Override
@@ -95,8 +107,23 @@ final class PDOMCParameter extends PDOMNamedNode implements IParameter, IPDOMBin
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object getAdapter(Class adapter) {
+		if (adapter.isAssignableFrom(IDescription.class)) {
+			return new IDescription() {
+				@Override
+				public String getDescription() {
+					Database db= getDB();
+					try {
+						IString str = db.getString(db.getRecPtr(record + DESCRIPTION));
+						return str.getString();
+					} catch (CoreException e) {
+						return null;
+					}
+				}
+			};
+		}
+
 		return null;
 	}
 

@@ -27,7 +27,6 @@ import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.internal.core.dom.parser.ProblemFunctionType;
 import org.eclipse.cdt.internal.core.index.IIndexCBindingConstants;
 import org.eclipse.cdt.internal.core.pdom.db.Database;
-import org.eclipse.cdt.internal.core.pdom.db.IString;
 import org.eclipse.cdt.internal.core.pdom.dom.PDOMBinding;
 import org.eclipse.cdt.internal.core.pdom.dom.PDOMLinkage;
 import org.eclipse.cdt.internal.core.pdom.dom.PDOMNode;
@@ -51,16 +50,11 @@ class PDOMCFunction extends PDOMBinding implements IFunction {
 	 * Offset for the type of this function (relative to the beginning of the record).
 	 */
 	private static final int FUNCTION_TYPE = FIRST_PARAM + Database.PTR_SIZE;
-	
-	/**
-	 * Documentation string.
-	 */
-	private static final int DESCRIPTION = FUNCTION_TYPE + Database.TYPE_SIZE;
 
 	/**
 	 * Offset of annotation information (relative to the beginning of the record).
 	 */
-	private static final int ANNOTATIONS = DESCRIPTION + Database.PTR_SIZE; // byte
+	private static final int ANNOTATIONS = FUNCTION_TYPE + Database.TYPE_SIZE; // byte
 	
 	/**
 	 * The size in bytes of a PDOMCPPFunction record in the database.
@@ -84,27 +78,6 @@ class PDOMCFunction extends PDOMBinding implements IFunction {
 		setParameters(parameters);
 		updateDescription(function);
 		getDB().putByte(record + ANNOTATIONS, annotations);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Override
-	public Object getAdapter(Class adapter) {
-		if (adapter.isAssignableFrom(IDescription.class)) {
-			return new IDescription() {
-				@Override
-				public String getDescription() {
-					Database db= getDB();
-					try {
-						IString str = db.getString(db.getRecPtr(record + DESCRIPTION));
-						return str.getString();
-					} catch (CoreException e) {
-						return null;
-					}
-				}
-			};
-		}
-
-		return super.getAdapter(adapter);
 	}
 
 	/**
@@ -146,16 +119,6 @@ class PDOMCFunction extends PDOMBinding implements IFunction {
 
 	private void setType(PDOMLinkage linkage, IFunctionType ft) throws CoreException {
 		linkage.storeType(record + FUNCTION_TYPE, ft);
-	}
-
-	private void setDescription(String description) throws CoreException {
-		final Database db= getDB();
-		if (description != null) {
-			long docRecord = db.newString(description).getRecord();
-			db.putRecPtr(record + DESCRIPTION, docRecord);
-		} else {
-			db.putRecPtr(record + DESCRIPTION, 0);
-		}
 	}
 
 	private void setParameters(IParameter[] params) throws CoreException {
