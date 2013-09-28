@@ -120,9 +120,7 @@ public class DoxygenMap implements IDoxygenMap {
 				}
 			} else if (d instanceof IASTFunctionDefinition) {
 				IASTFunctionDefinition fd = (IASTFunctionDefinition)d;
-				if (fd.getDeclarator() instanceof IASTStandardFunctionDeclarator) {
-					extactDoxygen((IASTStandardFunctionDeclarator)fd.getDeclarator(), doxygenMap, doxygenComments);
-				}
+				extactDoxygen(fd, doxygenMap, doxygenComments);
 			}
 		}
 		return doxygenMap;
@@ -144,6 +142,31 @@ public class DoxygenMap implements IDoxygenMap {
 		for (int j=0; j < params.length; j++) {
 			String paramName = params[j].getDeclarator().getName().getRawSignature();
 			putDocumentationToMap(doxygenMap, params[j], "param", paramName, relatedDoxygenComments); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Extract the doxygen comments for the given function definition.
+	 *
+	 * @param sfd
+	 * @param doxygenMap
+	 * @param doxygenComments
+	 *
+	 * @todo share code with above method better.
+	 */
+	private static void extactDoxygen(IASTFunctionDefinition fd, DoxygenMap doxygenMap, DoxygenComments doxygenComments) {
+		IASTDoxygenComment [] relatedDoxygenComments = findRelatedDoxygenComments(fd, doxygenComments);
+
+		if (fd.getDeclarator() instanceof IASTStandardFunctionDeclarator) {
+			IASTStandardFunctionDeclarator sfd = (IASTStandardFunctionDeclarator)fd.getDeclarator();
+			IASTParameterDeclaration [] params = sfd.getParameters();
+
+			putDocumentationToMap(doxygenMap, sfd, "", "", relatedDoxygenComments); //$NON-NLS-1$ //$NON-NLS-2$
+			for (int j=0; j < params.length; j++) {
+				String paramName = params[j].getDeclarator().getName().getRawSignature();
+				putDocumentationToMap(doxygenMap, params[j], "param", paramName, relatedDoxygenComments); //$NON-NLS-1$
+			}
+			putDocumentationToMap(doxygenMap, fd.getDeclSpecifier(), "return", "", relatedDoxygenComments); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
