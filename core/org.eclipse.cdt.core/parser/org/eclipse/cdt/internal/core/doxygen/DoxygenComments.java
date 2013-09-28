@@ -8,6 +8,12 @@ import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTDoxygenComment;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
+/**
+ * Class maintaining doxygen comments of an IASTTranslationUnit. One can iterate
+ * over the still active (not yet removed) doxygen comments.
+ *
+ * @author Sebastian Bauer
+ */
 public class DoxygenComments implements Iterable<IASTDoxygenComment> {
 	List<IASTDoxygenComment> doxygenComments = new LinkedList<IASTDoxygenComment>();
 	List<IASTDoxygenComment> toRemove = new LinkedList<IASTDoxygenComment>();
@@ -21,10 +27,18 @@ public class DoxygenComments implements Iterable<IASTDoxygenComment> {
 		}
 	}
 
+	/**
+	 * Mark the given comment as ready for removal.
+	 *
+	 * @param comment
+	 */
 	public void prepareForRemoval(IASTDoxygenComment comment) {
 		toRemove.add(comment);
 	}
 
+	/**
+	 * Remove all doxygen comments that have been marked for removal.
+	 */
 	public void remove() {
 		doxygenComments.removeAll(toRemove);
 	}
