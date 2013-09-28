@@ -14,10 +14,20 @@ import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.parser.IScanner;
 import org.eclipse.cdt.core.parser.tests.ast2.AST2TestBase;
 import org.eclipse.cdt.internal.core.doxygen.DoxygenMap;
 
 public class DoxygenMapTest extends AST2TestBase {
+	/**
+	 * Configure the scanner. Here, we enable the scanner to look for
+	 * doxygen tags.
+	 */
+	protected void configureScanner(IScanner scanner) {
+		super.configureScanner(scanner);
+		scanner.setParseDoxygen(true);
+	}
+
 	//	/**
 	//	 * A doxygen comment.
 	//	 * Second line.
