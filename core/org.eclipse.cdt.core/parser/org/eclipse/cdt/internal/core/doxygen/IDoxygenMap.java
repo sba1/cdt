@@ -11,8 +11,17 @@
 
 package org.eclipse.cdt.internal.core.doxygen;
 
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 public interface IDoxygenMap {
 	public String get(IASTNode n);
+
+	/**
+	 * Returns the file location of the Doxgen comment for the given node.
+	 *
+	 * @param n
+	 * @return the file location or null.
+	 */
+	public IASTFileLocation getLocation(IASTNode n);
 }

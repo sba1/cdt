@@ -19,6 +19,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTDoxygenComment;
 import org.eclipse.cdt.core.dom.ast.IASTDoxygenTag;
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTNodeLocation;
@@ -66,6 +67,7 @@ public class DoxygenMap implements IDoxygenMap {
 	}
 
 	private HashMap<IASTNode,String> map = new HashMap<IASTNode,String>();
+	private HashMap<IASTNode,IASTFileLocation> doxygenLocationMap = new HashMap<IASTNode,IASTFileLocation>();
 
 	public void put(IASTNode n, String doc) {
 		map.put(n, doc);
@@ -74,6 +76,16 @@ public class DoxygenMap implements IDoxygenMap {
 	@Override
 	public String get(IASTNode n) {
 		return map.get(n);
+	}
+
+
+	public void put(IASTNode n, IASTFileLocation doxygenLocation) {
+		doxygenLocationMap.put(n, doxygenLocation);
+	}
+
+	@Override
+	public IASTFileLocation getLocation(IASTNode n) {
+		return doxygenLocationMap.get(n);
 	}
 
 	/**
@@ -183,6 +195,9 @@ public class DoxygenMap implements IDoxygenMap {
 		String functionDesc = buildDocumentationFromDoxygenComments(tagName, prefix, relatedDoxygenComments);
 		if (functionDesc != null) {
 			doxygenMap.put(node, functionDesc);
+		}
+		if (relatedDoxygenComments != null && relatedDoxygenComments.length > 0) {
+			doxygenMap.put(node, relatedDoxygenComments[0].getFileLocation());
 		}
 	}
 
