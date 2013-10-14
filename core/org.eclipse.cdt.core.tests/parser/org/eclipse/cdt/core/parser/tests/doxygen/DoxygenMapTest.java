@@ -124,5 +124,9 @@ public class DoxygenMapTest extends AST2TestBase {
 		assertEquals("A test function.", doxygenMap.get(sfd));
 		assertEquals("first argument", doxygenMap.get(params[0]));
 		assertEquals("return value", doxygenMap.get(fd.getDeclSpecifier()));
+
+		assertNotNull(doxygenMap.getLocation(sfd));
+		assertEquals(1, doxygenMap.getLocation(sfd).getNodeOffset());
+		assertEquals(89, doxygenMap.getLocation(sfd).getNodeLength());
 	}
 }
