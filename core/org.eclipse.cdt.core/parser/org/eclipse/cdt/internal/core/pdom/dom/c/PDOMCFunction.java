@@ -89,7 +89,7 @@ class PDOMCFunction extends PDOMBinding implements IFunction {
 	 */
 	private void updateDescription(IBinding newBinding) throws CoreException {
 		IDescription desc = (IDescription)newBinding.getAdapter(IDescription.class);
-		if (desc != null) setDescription(desc.getDescription());
+		if (desc != null) setDescription(desc);
 	}
 
 	@Override

@@ -11,8 +11,11 @@
 
 package org.eclipse.cdt.internal.pdom.tests;
 
+import java.io.File;
+
 import junit.framework.Test;
 
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.model.ICProject;
@@ -53,8 +56,13 @@ public class DoxygenTests extends PDOMTestBase {
 		assertEquals(1, bindings.length);
 		IDescription desc = (IDescription) bindings[0].getAdapter(IDescription.class);
 		assertNotNull(desc);
+		assertNotNull(desc.getDoxygenCommentLocation());
 		assertEquals("This is a test function with 3 parameters and an int return type. " +
 					 "It is documented in the source.", desc.getDescription());
+		IASTFileLocation loc = desc.getDoxygenCommentLocation();
+		assertEquals("docinsource.c", new File(loc.getFileName()).getName());
+		assertEquals(58, loc.getNodeOffset());
+		assertEquals(243, loc.getNodeLength());
 	}
 
 	public void testDocInHeader() throws Exception {
@@ -62,7 +70,12 @@ public class DoxygenTests extends PDOMTestBase {
 		assertEquals(1, bindings.length);
 		IDescription desc = (IDescription) bindings[0].getAdapter(IDescription.class);
 		assertNotNull(desc);
+		assertNotNull(desc.getDoxygenCommentLocation());
 		assertEquals("This is a test function with 2 parameters and an int return type. " +
 					 "It is documented in the header.", desc.getDescription());
+		IASTFileLocation loc = desc.getDoxygenCommentLocation();
+		assertEquals("docinheader.h", new File(loc.getFileName()).getName());
+		assertEquals(77, loc.getNodeOffset());
+		assertEquals(213, loc.getNodeLength());
 	}
 }

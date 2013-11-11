@@ -13,4 +13,5 @@ package org.eclipse.cdt.core.dom.ast;
 
 public interface IDescription {
 	String getDescription();
+	IASTFileLocation getDoxygenCommentLocation();
 }

@@ -7,6 +7,9 @@ public abstract class AbstractBinding extends PlatformObject implements IBinding
 	/** The description of this binding */
 	private String description;
 
+	/** The location of an associated Doxygen comment */
+	private IASTFileLocation doxygenCommentLocation;
+
 	private IDescription descriptionAdapter;
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -19,6 +22,11 @@ public abstract class AbstractBinding extends PlatformObject implements IBinding
 					public String getDescription() {
 						return description;
 					}
+
+					@Override
+					public IASTFileLocation getDoxygenCommentLocation() {
+						return doxygenCommentLocation;
+					}
 				};
 			}
 			return descriptionAdapter;
@@ -30,6 +38,13 @@ public abstract class AbstractBinding extends PlatformObject implements IBinding
 		/* TODO: Accumulate somehow if multiple description exists */
 		if (description == null || description.length() == 0) {
 			description = DoxygenUtil.getDescription(node);
+			if (description != null) {
+				doxygenCommentLocation = DoxygenUtil.getDoxygenLocation(node);
+			}
+		} else {
+			if (doxygenCommentLocation == null) {
+				doxygenCommentLocation = DoxygenUtil.getDoxygenLocation(node);
+			}
 		}
 	}
 }

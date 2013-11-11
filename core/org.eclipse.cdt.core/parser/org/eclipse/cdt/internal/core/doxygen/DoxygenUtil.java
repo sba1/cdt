@@ -11,6 +11,7 @@
 
 package org.eclipse.cdt.internal.core.doxygen;
 
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 /**
@@ -28,6 +29,19 @@ public class DoxygenUtil {
 		IDoxygenMap doxygenMap = (IDoxygenMap)node.getTranslationUnit().getAdapter(IDoxygenMap.class);
 		if (doxygenMap != null)
 			return doxygenMap.get(node);
+		return null;
+	}
+
+	/**
+	 * Return the location for Doxygen comment that is associated to the given
+	 * node.
+	 *
+	 * @return the location or null.
+	 */
+	public static IASTFileLocation getDoxygenLocation(IASTNode node) {
+		IDoxygenMap doxygenMap = (IDoxygenMap)node.getTranslationUnit().getAdapter(IDoxygenMap.class);
+		if (doxygenMap != null)
+			return doxygenMap.getLocation(node);
 		return null;
 	}
 }

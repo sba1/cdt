@@ -13,6 +13,7 @@
 package org.eclipse.cdt.internal.core.pdom.dom.c;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.dom.ast.IType;
@@ -120,6 +121,11 @@ final class PDOMCParameter extends PDOMNamedNode implements IParameter, IPDOMBin
 					} catch (CoreException e) {
 						return null;
 					}
+				}
+
+				@Override
+				public IASTFileLocation getDoxygenCommentLocation() {
+					return null;
 				}
 			};
 		}

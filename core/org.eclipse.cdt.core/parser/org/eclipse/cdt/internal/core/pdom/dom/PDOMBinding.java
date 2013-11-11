@@ -18,7 +18,9 @@ import java.lang.reflect.Modifier;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.ast.ASTTypeUtil;
 import org.eclipse.cdt.core.dom.ast.DOMException;
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IDescription;
 import org.eclipse.cdt.core.dom.ast.IFunction;
@@ -52,9 +54,12 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 	private static final int FIRST_REF_OFFSET    = PDOMNamedNode.RECORD_SIZE + 8; // size 4
 	private static final int LOCAL_TO_FILE		 = PDOMNamedNode.RECORD_SIZE + 12; // size 4
 	private static final int DESCRIPTION         = PDOMNamedNode.RECORD_SIZE + 16; // size 4
+	private static final int DOXYGEN_FILE        = PDOMNamedNode.RECORD_SIZE + 20; // size 4
+	private static final int DOXYGEN_OFFSET      = PDOMNamedNode.RECORD_SIZE + 24; // size 4
+	private static final int DOXYGEN_LENGTH      = PDOMNamedNode.RECORD_SIZE + 28; // size 4
 
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = PDOMNamedNode.RECORD_SIZE + 20;
+	protected static final int RECORD_SIZE = PDOMNamedNode.RECORD_SIZE + 32;
 	private byte hasDeclaration= -1;
 
 	protected PDOMBinding(PDOMLinkage linkage, PDOMNode parent, char[] name) throws CoreException {
@@ -81,6 +86,20 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 			return new PDOMTaggable(getPDOM(), getRecord());
 
 		if (adapter.isAssignableFrom(IDescription.class)) {
+			final String fileName;
+			final int nodeOffset;
+			final int nodeLength;
+			Database db = getDB();
+			try {
+				IString str = db.getString(db.getRecPtr(record + DOXYGEN_FILE));
+				fileName = str.getString();
+				nodeOffset = db.getInt(record + DOXYGEN_OFFSET);
+				nodeLength = db.getInt(record + DOXYGEN_LENGTH);
+			} catch (CoreException e1) {
+				e1.printStackTrace();
+				return null;
+			}
+
 			return new IDescription() {
 				@Override
 				public String getDescription() {
@@ -91,6 +110,42 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 					} catch (CoreException e) {
 						return null;
 					}
+				}
+
+				@Override
+				public IASTFileLocation getDoxygenCommentLocation() {
+					return new IASTFileLocation() {
+						@Override
+						public IASTFileLocation asFileLocation() {
+							return this;
+						}
+						@Override
+						public int getStartingLineNumber() {
+							return 0;
+						}
+						@Override
+						public int getNodeOffset() {
+							return nodeOffset;
+						}
+						@Override
+						public int getNodeLength() {
+							return nodeLength;
+						}
+						@Override
+						public String getFileName() {
+							return fileName;
+						}
+						@Override
+						public int getEndingLineNumber() {
+							// TODO Auto-generated method stub
+							return 0;
+						}
+						@Override
+						public IASTPreprocessorIncludeStatement getContextInclusionStatement() {
+							// TODO Auto-generated method stub
+							return null;
+						}
+					};
 				}
 			};
 		}
@@ -477,13 +532,24 @@ public abstract class PDOMBinding extends PDOMNamedNode implements IPDOMBinding 
 	 * @param description
 	 * @throws CoreException
 	 */
-	protected void setDescription(String description) throws CoreException {
+	protected void setDescription(IDescription description) throws CoreException {
 		final Database db= getDB();
-		if (description != null) {
-			long docRecord = db.newString(description).getRecord();
+		String descriptionString = description.getDescription();
+		if (descriptionString != null) {
+			long docRecord = db.newString(descriptionString).getRecord();
 			db.putRecPtr(record + DESCRIPTION, docRecord);
 		} else {
 			db.putRecPtr(record + DESCRIPTION, 0);
+		}
+		IASTFileLocation doxygenCommentLocation = description.getDoxygenCommentLocation();
+		if (doxygenCommentLocation != null) {
+			if (doxygenCommentLocation.getFileName() != null) {
+				db.putRecPtr(record + DOXYGEN_FILE, db.newString(doxygenCommentLocation.getFileName()).getRecord());
+			} else {
+				db.putRecPtr(record + DOXYGEN_FILE, 0);
+			}
+			db.putInt(record + DOXYGEN_OFFSET, doxygenCommentLocation.getNodeOffset());
+			db.putInt(record + DOXYGEN_LENGTH, doxygenCommentLocation.getNodeLength());
 		}
 	}
 }
